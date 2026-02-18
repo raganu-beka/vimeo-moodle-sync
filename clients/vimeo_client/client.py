@@ -30,7 +30,7 @@ class VimeoClient:
         response.raise_for_status()
         return response.json()
 
-    def get_user_folder_today_videos(self, user_id: int, folder_id: int) -> list[dict]:
+    def get_user_folder_today_videos(self, user_id: int, folder_id: int) -> list[VimeoVideo]:
         request_params = f'sort=date&direction=desc&per_page={VimeoClient.MAX_RESULTS}&filter_content=videos'
         videos = self.get_user_folder_videos(user_id, folder_id, request_params)
 
