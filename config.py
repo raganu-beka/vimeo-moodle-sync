@@ -3,7 +3,7 @@ from typing import Any
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from course_matcher.normalize import UnknownTypeBehavior
+from course_matcher.parsing.recording_normalizer import TitleTimestampTimezoneMode
 
 
 def _get_missing_settings(required_settings: dict[str, Any]) -> list[str]:
@@ -21,17 +21,18 @@ class Settings(BaseSettings):
     vimeo_user_id: int = Field('VIMEO_USER_ID')
     vimeo_folder_id: int = Field('VIMEO_FOLDER_ID')
 
-    course_pattern: str = Field('COURSE_PATTERN')
-    group_map: dict[str, str] = Field('GROUP_MAP')
-    time_formats: list[str] = Field('TIME_FORMATS')
-    type_keywords: dict[str, list[str]] = Field('TYPE_KEYWORDS')
-    unknown_type_behavior: str = Field(
-        default=UnknownTypeBehavior.RETURN_NONE,
-        alias='UNKNOWN_TYPE_BEHAVIOR'
-    )
-    default_type: str | None = Field('DEFAULT_TYPE')
+    timezone_name: str = Field('TIMEZONE_NAME')
 
-    @field_validator('group_map')
+    course_title_pattern: str = Field('COURSE_TITLE_PATTERN')
+    course_title_pattern_group_map: dict[str, str] = Field('COURSE_TITLE_PATTERN_GROUP_MAP')
+    course_title_time_formats: list[str] = Field('COURSE_TITLE_TIME_FORMATS')
+
+    recording_type_keywords: dict[str, list[str]] = Field('RECORDING_TYPE_KEYWORDS')
+    recording_title_timestamp_pattern: str = Field('RECORDING_TITLE_TIMESTAMP_PATTERN')
+    recording_title_timestamp_timezone: TitleTimestampTimezoneMode = Field('RECORDING_TITLE_TIMESTAMP_TIMEZONE')
+    recording_title_timestamp_datetime_formats: list[str] = Field('RECORDING_TITLE_TIMESTAMP_DATETIME_FORMATS')
+
+    @field_validator('course_title_pattern_group_map')
     @classmethod
     def validate_group_map(cls, v: dict[str, str]) -> dict[str, str]:
         required_keys = {'course_type', 'weekday', 'start_time'}
@@ -43,21 +44,17 @@ class Settings(BaseSettings):
     @model_validator(mode='after')
     def validate_normalization_settings(self) -> 'Settings':
         required_settings = {
-            'COURSE_PATTERN': self.course_pattern,
-            'GROUP_MAP': self.group_map,
-            'TIME_FORMATS': self.time_formats,
-            'TYPE_KEYWORDS': self.type_keywords,
+            'COURSE_TITLE_PATTERN': self.course_title_pattern,
+            'COURSE_TITLE_PATTERN_GROUP_MAP': self.course_title_pattern_group_map,
+            'COURSE_TITLE_TIME_FORMATS': self.course_title_time_formats,
+            'RECORDING_TYPE_KEYWORDS': self.recording_type_keywords,
+            'RECORDING_TITLE_TIMESTAMP_PATTERN': self.recording_title_timestamp_pattern,
+            'RECORDING_TITLE_TIMESTAMP_TIMEZONE': self.recording_title_timestamp_timezone,
+            'RECORDING_TITLE_TIMESTAMP_DATETIME_FORMATS': self.recording_title_timestamp_datetime_formats,
         }
-
         missing = _get_missing_settings(required_settings)
         if missing:
-            raise ValueError(f'Missing required Vimeo settings: {missing}')
-
-        if (
-                self.unknown_type_behavior == UnknownTypeBehavior.RETURN_DEFAULT
-                and not self.default_type
-        ):
-            raise ValueError(f'DEFAULT_TYPE is required when UNKNOWN_TYPE_BEHAVIOR is \'return_default\'')
+            raise ValueError(f'Missing required parsing settings: {missing}')
         return self
 
     @model_validator(mode='after')
