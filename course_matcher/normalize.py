@@ -96,7 +96,7 @@ class KeywordClassifier(RecordingTypeClassifier):
             type_keywords: Mapping[str, Sequence[str]],
             *,
             unknown_type_behavior: UnknownTypeBehavior = UnknownTypeBehavior.RETURN_NONE,
-            default_type: str | None
+            default_type: str | None = None
     ) -> None:
         self._type_keywords = {
             t: tuple(k.lower() for k in keywords)
