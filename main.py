@@ -13,7 +13,6 @@ vimeo = VimeoClient(settings.vimeo_access_token)
 
 day = date(2026, 2, 26)
 videos = vimeo.get_user_folder_videos_by_date(settings.vimeo_user_id, settings.vimeo_folder_id, day)
-pprint(videos)
 
 parsed_course_names = [parse_course_name(course, settings) for course in settings.courses]
 sessions = get_sessions_for_date(parsed_course_names, day, settings.timezone_name)
