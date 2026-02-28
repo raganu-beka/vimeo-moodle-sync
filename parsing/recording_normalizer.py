@@ -4,8 +4,8 @@ from typing import Pattern, Sequence
 from zoneinfo import ZoneInfo
 
 import config
-from clients.vimeo_client.models import VimeoVideo
-from course_matcher.models import TitleTimestampTimezoneMode, TimeSource, Recording
+from integrations.vimeo_client.models import VimeoVideo
+from models import TitleTimestampTimezoneMode, TimeSource, Recording
 
 
 def _extract_title_timestamp(

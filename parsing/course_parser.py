@@ -3,7 +3,8 @@ from datetime import datetime, time
 from typing import Sequence
 
 from config import Settings
-from course_matcher.models import ParsedCourseName
+from models import ParsedCourseName
+from parsing.weekday import weekday_to_int
 
 
 def _parse_time_value(value: str, formats: Sequence[str]) -> time:
@@ -28,16 +29,15 @@ def parse_course_name(raw_name: str, settings: Settings) -> ParsedCourseName:
     course_type = gd[group_map['course_type']]
     weekday_raw = gd[group_map['weekday']]
     start_time_raw = gd[group_map['start_time']]
-
-    grade_group_key = group_map.get('grade_group')
-    grade_group = gd.get(grade_group_key) if grade_group_key else None
+    grade_group_key = gd[group_map['grade_group']]
 
     parsed_time = _parse_time_value(start_time_raw, settings.course_title_time_formats)
+    weekday = weekday_to_int(weekday_raw, settings.weekday_map)
 
     return ParsedCourseName(
         raw=raw_name,
         course_type=course_type,
-        grade_group=grade_group,
-        weekday=weekday_raw,
+        grade_group=grade_group_key,
+        weekday=weekday,
         start_time=parsed_time
     )

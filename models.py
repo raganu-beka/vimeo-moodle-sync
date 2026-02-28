@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime, date, time
 from enum import Enum
 
-from clients.vimeo_client.models import VimeoVideo
+from integrations.vimeo_client.models import VimeoVideo
 
 
 class TimeSource(str, Enum):
@@ -17,9 +17,9 @@ class TitleTimestampTimezoneMode(str, Enum):
 
 @dataclass(slots=True, frozen=True)
 class CourseSession:
-    id: str
-    type: str
-    scheduled_start: datetime
+    course_key: str
+    course_type: str
+    scheduled_start_utc: datetime
 
 
 @dataclass(slots=True, frozen=True)
@@ -27,7 +27,7 @@ class ParsedCourseName:
     raw: str
     course_type: str
     grade_group: str | None
-    weekday: str
+    weekday: int
     start_time: time
 
 
