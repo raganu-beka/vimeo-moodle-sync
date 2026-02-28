@@ -106,10 +106,10 @@ class KeywordClassifier(RecordingTypeClassifier):
         self._default_type = default_type
 
     def classify(self, title: str) -> str | None:
-        normalized = title.lower()
+        tokens = set(title.lower().split())
 
         for course_type, keywords in self._type_keywords.items():
-            if any(k in normalized for k in keywords):
+            if any(k in tokens for k in keywords):
                 return course_type
 
         if self._unknown_type_behavior is UnknownTypeBehavior.RETURN_NONE:
