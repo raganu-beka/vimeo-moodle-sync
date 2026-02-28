@@ -1,13 +1,14 @@
 from dataclasses import dataclass
+from datetime import timedelta
 from typing import Optional
 
 
-@dataclass(frozen=True)
+@dataclass(slots=True, frozen=True)
 class VimeoVideo:
     uri: str
     name: str
     link: str
-    duration: str
+    duration: timedelta
     created_time: Optional[str]
 
     @staticmethod

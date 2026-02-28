@@ -8,7 +8,7 @@ from .models import VimeoVideo
 class VimeoClient:
     MAX_RESULTS = 25
 
-    def __init__(self, access_token: str):
+    def __init__(self, access_token: str) -> None:
         self.client = vimeo.client.VimeoClient(token=access_token)
 
     def get_me(self) -> dict:
