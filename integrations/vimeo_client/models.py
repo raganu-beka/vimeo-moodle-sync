@@ -9,7 +9,7 @@ class VimeoVideo:
     name: str
     link: str
     duration: timedelta
-    created_time: Optional[str]
+    created_time: str
 
     @staticmethod
     def from_api(data: dict):

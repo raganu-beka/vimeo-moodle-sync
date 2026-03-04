@@ -34,10 +34,10 @@ class Settings(BaseSettings):
     recording_title_timestamp_timezone: TitleTimestampTimezoneMode = Field('RECORDING_TITLE_TIMESTAMP_TIMEZONE')
     recording_title_timestamp_datetime_formats: list[str] = Field('RECORDING_TITLE_TIMESTAMP_DATETIME_FORMATS')
 
-    @field_validator('course_title_pattern_group_map')
     @classmethod
+    @field_validator('course_title_pattern_group_map')
     def validate_group_map(cls, v: dict[str, str]) -> dict[str, str]:
-        required_keys = {'course_type', 'weekday', 'start_time'}
+        required_keys = {'course_type', 'weekday', 'start_time', 'grade_group'}
         if not required_keys.issubset(v.keys()):
             missing = required_keys - v.keys()
             raise ValueError(f'GROUP_MAP is missing required keys: {missing}')
