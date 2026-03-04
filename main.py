@@ -7,17 +7,19 @@ from parsing.course_parser import parse_course_name
 from parsing.recording_normalizer import normalize_recording
 from scheduling.schedule_day import get_sessions_for_date
 
-settings = config.Settings()
+if __name__ == '__main__':
 
-vimeo = VimeoClient(settings.vimeo_access_token)
+    settings = config.Settings()
 
-day = date(2026, 2, 26)
-videos = vimeo.get_user_folder_videos_by_date(settings.vimeo_user_id, settings.vimeo_folder_id, day)
+    vimeo = VimeoClient(settings.vimeo_access_token)
 
-parsed_course_names = [parse_course_name(course, settings) for course in settings.courses]
-sessions = get_sessions_for_date(parsed_course_names, day, settings.timezone_name)
-pprint(sessions)
+    day = date(2026, 3, 4)
+    videos = vimeo.get_user_folder_videos_by_date(settings.vimeo_user_id, settings.vimeo_folder_id, day)
 
-for video in videos:
-    normalized_recording = normalize_recording(video, settings)
-    pprint(normalized_recording)
+    parsed_course_names = [parse_course_name(course, settings) for course in settings.courses]
+    sessions = get_sessions_for_date(parsed_course_names, day, settings.timezone_name)
+    pprint(sessions)
+
+    for video in videos:
+        normalized_recording = normalize_recording(video, settings)
+        pprint(normalized_recording)

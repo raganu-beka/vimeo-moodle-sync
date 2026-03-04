@@ -15,7 +15,7 @@ class VimeoVideo:
         return VimeoVideo(
             uri=data['uri'],
             name=data['name'],
-            duration=timedelta(data['duration']),
+            duration=timedelta(seconds=data['duration']),
             link=data['link'],
             created_time=data.get('created_time')
         )
