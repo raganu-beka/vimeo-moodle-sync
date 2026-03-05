@@ -38,3 +38,11 @@ class Recording:
     recording_start_utc: datetime
     recording_date_local: date
     time_source: TimeSource
+
+
+@dataclass(frozen=True)
+class MatchResult:
+    matches: dict[str, Recording]
+    unmatched: list[Recording]
+    unmatched_no_candidate: list[Recording]
+    candidate_not_selected: list[Recording]
