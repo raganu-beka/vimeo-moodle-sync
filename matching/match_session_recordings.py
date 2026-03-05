@@ -1,6 +1,8 @@
 from collections import Counter
 from datetime import timedelta, datetime
 from typing import Any
+
+from config import Settings
 from models import CourseSession, Recording, MatchResult
 
 
@@ -113,14 +115,12 @@ def _prepare_match_result(recordings: list[Recording],
 
 def match_session_recordings(sessions: list[CourseSession],
                              recordings: list[Recording],
-                             *,
-                             early_tolerance: timedelta = timedelta(minutes=15),
-                             late_tolerance: timedelta = timedelta(minutes=15)) -> MatchResult:
+                             settings: Settings) -> MatchResult:
     sessions_by_type = get_sessions_by_type(sessions)
     recordings_by_type = get_recordings_by_type(recordings)
     candidates = _get_session_recording_candidates(sessions_by_type, recordings_by_type,
-                                                   early_tolerance=early_tolerance,
-                                                   late_tolerance=late_tolerance)
+                                                   early_tolerance=timedelta(minutes=settings.recording_early_tolerance_minutes),
+                                                   late_tolerance=timedelta(minutes=settings.recording_late_tolerance_minutes))
     matches = _get_matches_from_candidates(candidates)
 
     return _prepare_match_result(recordings, candidates, matches)
