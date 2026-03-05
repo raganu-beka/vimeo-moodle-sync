@@ -4,13 +4,6 @@ from zoneinfo import ZoneInfo
 from models import ParsedCourseName, CourseSession
 
 
-def _sort_by_scheduled_start(sessions: list[CourseSession]) -> list[CourseSession]:
-    return sorted(
-        sessions,
-        key=lambda session: session.scheduled_start_utc
-    )
-
-
 def get_sessions_for_date(
         parsed_courses: list[ParsedCourseName],
         date_local: date,
@@ -31,4 +24,4 @@ def get_sessions_for_date(
             scheduled_start_utc=course_start_utc
         ))
 
-    return _sort_by_scheduled_start(date_sessions)
+    return date_sessions
