@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     vimeo = VimeoClient(settings.vimeo_access_token)
 
-    day = date(2026, 3, 4)
+    day = date(2026, 3, 5)
     videos = vimeo.get_user_folder_videos_by_date(settings.vimeo_user_id, settings.vimeo_folder_id, day)
 
     parsed_course_names = [parse_course_name(course, settings) for course in settings.courses]
