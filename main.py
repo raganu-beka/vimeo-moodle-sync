@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from pprint import pprint
 import argparse
 
@@ -15,8 +15,8 @@ if __name__ == '__main__':
         '--day',
         nargs='?',
         type=lambda x: datetime.strptime(x, '%Y-%m-%d').date(),
-        default=datetime.now().date(),
-        help='Date to get match recordings for in YYYY-MM-DD format. Defaults to current day.'
+        default=datetime.now(UTC).date(),
+        help='Date to get match recordings for in YYYY-MM-DD format. Defaults to current UTC day.'
     )
     args = parser.parse_args()
 

@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, UTC
 
 import vimeo
 
@@ -31,16 +31,30 @@ class VimeoClient:
         return response.json()
 
     def get_user_folder_videos_by_date(self, user_id: int, folder_id: int, day: date) -> list[VimeoVideo]:
-        request_params = f'sort=date&direction=desc&per_page={VimeoClient.MAX_RESULTS}&filter_content=videos'
-        videos = self.get_user_folder_videos(user_id, folder_id, request_params)
+        request_params = 'sort=date&direction=desc&per_page={max_results}&filter_content=videos&page={page}'
 
         videos_on_day = []
-        for video in videos['data']:
-            created_time = video['created_time']
-            video_date = datetime.fromisoformat(created_time).date()
 
-            if video_date == day:
-                videos_on_day.append(VimeoVideo.from_api(video))
+        page = 1
+        keep_fetching = True
+
+        while keep_fetching:
+            videos = self.get_user_folder_videos(user_id, folder_id,
+                                                 request_params.format(page=page, max_results=VimeoClient.MAX_RESULTS))
+            if not videos['data']:
+                break
+
+            for video in videos['data']:
+                created_time = video['created_time']
+                video_date = datetime.fromisoformat(created_time).astimezone(UTC).date()
+
+                if video_date < day:
+                    keep_fetching = False
+                    break
+                if video_date == day:
+                    videos_on_day.append(VimeoVideo.from_api(video))
+
+            page += 1
 
         return videos_on_day
 
