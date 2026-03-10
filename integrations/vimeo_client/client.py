@@ -43,3 +43,8 @@ class VimeoClient:
                 videos_on_day.append(VimeoVideo.from_api(video))
 
         return videos_on_day
+
+    def update_video_settings(self, video_uri: str, settings: dict) -> dict:
+        response = self.client.patch(video_uri, json=settings)
+        response.raise_for_status()
+        return response.json()
