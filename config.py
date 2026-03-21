@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     recording_late_tolerance_minutes: int = Field(..., validation_alias='RECORDING_LATE_TOLERANCE_MINUTES')
 
     video_settings_file: str = Field(..., validation_alias='VIDEO_SETTINGS_FILE')
+    video_settings_name_field: str = Field(..., validation_alias='VIDEO_SETTINGS_NAME_FIELD')
+    video_name_timestamp_format: str = Field(..., validation_alias='VIDEO_NAME_TIMESTAMP_FORMAT')
 
     @classmethod
     @field_validator('course_title_pattern_group_map')
