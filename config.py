@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     recording_early_tolerance_minutes: int = Field(..., validation_alias='RECORDING_EARLY_TOLERANCE_MINUTES')
     recording_late_tolerance_minutes: int = Field(..., validation_alias='RECORDING_LATE_TOLERANCE_MINUTES')
 
+    video_settings_file: str = Field(..., validation_alias='VIDEO_SETTINGS_FILE')
+
     @classmethod
     @field_validator('course_title_pattern_group_map')
     def validate_group_map(cls, v: dict[str, str]) -> dict[str, str]:
