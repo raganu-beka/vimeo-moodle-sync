@@ -1,6 +1,8 @@
-from datetime import datetime, date, UTC
+import random
+from datetime import datetime, date, UTC, timedelta
 
 import vimeo
+from aiohttp.web_fileresponse import content_type
 
 from .models import VimeoVideo
 
@@ -58,7 +60,20 @@ class VimeoClient:
 
         return videos_on_day
 
-    def update_video_settings(self, video_uri: str, settings: dict) -> dict:
-        response = self.client.patch(video_uri, json=settings)
+    def update_video_settings(self, video: VimeoVideo, settings: dict) -> dict:
+        response = self.client.patch(video.uri, json=settings)
         response.raise_for_status()
         return response.json()
+
+    def set_random_thumbnail_for_video(self, video: VimeoVideo) -> None:
+        min_seconds = round(video.duration.total_seconds() * 0.1)
+        max_seconds = round(video.duration.total_seconds() * 0.9)
+        random_time = random.randint(min_seconds, max_seconds)
+
+        create_picture_request_uri = f'{video.uri}/pictures'
+        create_picture_response = self.client.post(create_picture_request_uri, json={'time': random_time})
+        create_picture_response.raise_for_status()
+
+        update_picture_request_uri = create_picture_response.content
+        update_picture_response = self.client.patch(update_picture_request_uri, json={'active': true})
+        update_picture_response.raise_for_status()
