@@ -1,8 +1,7 @@
 import random
-from datetime import datetime, date, UTC, timedelta
+from datetime import UTC, date, datetime
 
 import vimeo
-from aiohttp.web_fileresponse import content_type
 
 from .models import VimeoVideo
 
