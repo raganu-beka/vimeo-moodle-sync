@@ -13,9 +13,9 @@ class VimeoVideo:
     @staticmethod
     def from_api(data: dict):
         return VimeoVideo(
-            uri=data['uri'],
-            name=data['name'],
-            duration=timedelta(seconds=data['duration']),
-            link=data['link'],
-            created_time=data.get('created_time')
+            uri=data["uri"],
+            name=data["name"],
+            duration=timedelta(seconds=data["duration"]),
+            link=data["link"],
+            created_time=str(data.get("created_time")),
         )

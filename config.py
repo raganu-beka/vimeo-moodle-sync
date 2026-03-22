@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -6,41 +8,62 @@ from parsing.recording_normalizer import TitleTimestampTimezoneMode
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file='.env',
-        env_file_encoding='utf-8',
-        extra='ignore'
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
 
-    vimeo_access_token: str = Field(..., validation_alias='VIMEO_ACCESS_TOKEN')
-    vimeo_user_id: int = Field(..., validation_alias='VIMEO_USER_ID')
-    vimeo_folder_id: int = Field(..., validation_alias='VIMEO_FOLDER_ID')
+    vimeo_access_token: str = Field(..., validation_alias="VIMEO_ACCESS_TOKEN")
+    vimeo_user_id: int = Field(..., validation_alias="VIMEO_USER_ID")
+    vimeo_folder_id: int = Field(..., validation_alias="VIMEO_FOLDER_ID")
 
-    timezone_name: str = Field(..., validation_alias='TIMEZONE_NAME')
-    weekday_map: dict[str, int] = Field(..., validation_alias='WEEKDAY_MAP')
+    timezone_name: str = Field(..., validation_alias="TIMEZONE_NAME")
+    weekday_map: dict[str, int] = Field(..., validation_alias="WEEKDAY_MAP")
 
-    courses: list[str] = Field(..., validation_alias='COURSES')
-    course_title_pattern: str = Field(..., validation_alias='COURSE_TITLE_PATTERN')
-    course_title_pattern_group_map: dict[str, str] = Field(..., validation_alias='COURSE_TITLE_PATTERN_GROUP_MAP')
-    course_title_time_formats: list[str] = Field(..., validation_alias='COURSE_TITLE_TIME_FORMATS')
+    courses: list[str] = Field(..., validation_alias="COURSES")
+    course_title_pattern: str = Field(..., validation_alias="COURSE_TITLE_PATTERN")
+    course_title_pattern_group_map: dict[str, str] = Field(
+        ..., validation_alias="COURSE_TITLE_PATTERN_GROUP_MAP"
+    )
+    course_title_time_formats: list[str] = Field(
+        ..., validation_alias="COURSE_TITLE_TIME_FORMATS"
+    )
 
-    recording_type_keywords: dict[str, list[str]] = Field(..., validation_alias='RECORDING_TYPE_KEYWORDS')
-    recording_title_timestamp_pattern: str = Field(..., validation_alias='RECORDING_TITLE_TIMESTAMP_PATTERN')
-    recording_title_timestamp_timezone: TitleTimestampTimezoneMode = Field(..., validation_alias='RECORDING_TITLE_TIMESTAMP_TIMEZONE')
-    recording_title_timestamp_datetime_formats: list[str] = Field(..., validation_alias='RECORDING_TITLE_TIMESTAMP_DATETIME_FORMATS')
+    recording_type_keywords: dict[str, list[str]] = Field(
+        ..., validation_alias="RECORDING_TYPE_KEYWORDS"
+    )
+    recording_title_timestamp_pattern: str = Field(
+        ..., validation_alias="RECORDING_TITLE_TIMESTAMP_PATTERN"
+    )
+    recording_title_timestamp_timezone: TitleTimestampTimezoneMode = Field(
+        ..., validation_alias="RECORDING_TITLE_TIMESTAMP_TIMEZONE"
+    )
+    recording_title_timestamp_datetime_formats: list[str] = Field(
+        ..., validation_alias="RECORDING_TITLE_TIMESTAMP_DATETIME_FORMATS"
+    )
 
-    recording_early_tolerance_minutes: int = Field(..., validation_alias='RECORDING_EARLY_TOLERANCE_MINUTES')
-    recording_late_tolerance_minutes: int = Field(..., validation_alias='RECORDING_LATE_TOLERANCE_MINUTES')
+    recording_early_tolerance_minutes: int = Field(
+        ..., validation_alias="RECORDING_EARLY_TOLERANCE_MINUTES"
+    )
+    recording_late_tolerance_minutes: int = Field(
+        ..., validation_alias="RECORDING_LATE_TOLERANCE_MINUTES"
+    )
 
-    video_settings_file: str = Field(..., validation_alias='VIDEO_SETTINGS_FILE')
-    video_settings_name_field: str = Field(..., validation_alias='VIDEO_SETTINGS_NAME_FIELD')
-    video_name_timestamp_format: str = Field(..., validation_alias='VIDEO_NAME_TIMESTAMP_FORMAT')
+    video_settings_file: str = Field(..., validation_alias="VIDEO_SETTINGS_FILE")
+    video_settings_name_field: str = Field(
+        ..., validation_alias="VIDEO_SETTINGS_NAME_FIELD"
+    )
+    video_name_timestamp_format: str = Field(
+        ..., validation_alias="VIDEO_NAME_TIMESTAMP_FORMAT"
+    )
+
+    if TYPE_CHECKING:
+
+        def __init__(self) -> None: ...
 
     @classmethod
-    @field_validator('course_title_pattern_group_map')
+    @field_validator("course_title_pattern_group_map")
     def validate_group_map(cls, v: dict[str, str]) -> dict[str, str]:
-        required_keys = {'course_type', 'weekday', 'start_time', 'grade_group'}
+        required_keys = {"course_type", "weekday", "start_time", "grade_group"}
         if not required_keys.issubset(v.keys()):
             missing = required_keys - v.keys()
-            raise ValueError(f'GROUP_MAP is missing required keys: {missing}')
+            raise ValueError(f"GROUP_MAP is missing required keys: {missing}")
         return v
-
