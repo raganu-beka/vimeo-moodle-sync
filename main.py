@@ -118,8 +118,20 @@ def run_integration() -> None:
             f"Updating settings for recording '{recording.vimeo_video.name}' ({recording_name})"
         )
 
-        vimeo.update_video_settings(recording.vimeo_video, recording_settings)
-        vimeo.set_random_thumbnail_for_video(recording.vimeo_video)
+        try:
+            vimeo.update_video_settings(recording.vimeo_video, recording_settings)
+        except Exception as e:
+            print(
+                f"Error updating settings for recording '{recording.vimeo_video.name}': {e}"
+            )
+            continue
+
+        try:
+            vimeo.set_random_thumbnail_for_video(recording.vimeo_video)
+        except Exception as e:
+            print(
+                f"Error setting thumbnail for recording '{recording.vimeo_video.name}': {e}"
+            )
 
 
 if __name__ == "__main__":
