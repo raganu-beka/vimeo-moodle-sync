@@ -101,6 +101,7 @@ def run_integration() -> None:
             "Do you wish to update settings for matched recordings? (Y/n): "
         )
         if change_settings_input != "Y":
+            print("Exiting without updating settings.")
             return
 
     video_settings = load_settings_from_json(settings.video_settings_file)
