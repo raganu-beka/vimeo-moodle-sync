@@ -1,8 +1,10 @@
 import argparse
 from datetime import UTC, datetime
 from json import load
+from pprint import pprint
 
 import config
+from integrations.moodle_client import MoodleClient
 from integrations.vimeo_client import VimeoClient
 from matching.match_session_recordings import match_session_recordings
 from models import MatchResult
@@ -79,6 +81,15 @@ def run_integration() -> None:
     )
     args = parser.parse_args()
 
+    moodle_settings = config.MoodleSettings()
+    moodle = MoodleClient(
+        moodle_settings.moodle_base_url, moodle_settings.moodle_access_token
+    )
+
+    courses = moodle.get_courses()
+    print("AVAILABLE MOODLE COURSES")
+    pprint(courses)
+
     settings = config.Settings()
     vimeo = VimeoClient(settings.vimeo_access_token)
 
@@ -108,9 +119,7 @@ def run_integration() -> None:
     video_settings = load_settings_from_json(video_update_settings.video_settings_file)
 
     for course_name, recording in match_result.matches.items():
-        recording_name = (
-            f"{course_name}-{args.day.strftime(video_update_settings.video_name_timestamp_format)}"
-        )
+        recording_name = f"{course_name}-{args.day.strftime(video_update_settings.video_name_timestamp_format)}"
 
         recording_settings = video_settings.copy()
         recording_settings[video_update_settings.video_settings_name_field] = (

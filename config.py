@@ -79,4 +79,9 @@ class VideoUpdateSettings(AppSettings):
 
 
 class MoodleSettings(AppSettings):
+    moodle_base_url: str = Field(..., validation_alias="MOODLE_BASE_URL")
     moodle_access_token: str = Field(..., validation_alias="MOODLE_ACCESS_TOKEN")
+
+    if TYPE_CHECKING:
+
+        def __init__(self) -> None: ...
