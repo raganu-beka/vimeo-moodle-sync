@@ -104,15 +104,18 @@ def run_integration() -> None:
             print("Exiting without updating settings.")
             return
 
-    video_settings = load_settings_from_json(settings.video_settings_file)
+    video_update_settings = config.VideoUpdateSettings()
+    video_settings = load_settings_from_json(video_update_settings.video_settings_file)
 
     for course_name, recording in match_result.matches.items():
         recording_name = (
-            f"{course_name}-{args.day.strftime(settings.video_name_timestamp_format)}"
+            f"{course_name}-{args.day.strftime(video_update_settings.video_name_timestamp_format)}"
         )
 
         recording_settings = video_settings.copy()
-        recording_settings[settings.video_settings_name_field] = recording_name
+        recording_settings[video_update_settings.video_settings_name_field] = (
+            recording_name
+        )
 
         print(
             f"Updating settings for recording '{recording.vimeo_video.name}' ({recording_name})"

@@ -6,10 +6,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from parsing.recording_normalizer import TitleTimestampTimezoneMode
 
 
-class Settings(BaseSettings):
+class AppSettings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
+
+
+class Settings(AppSettings):
 
     vimeo_access_token: str = Field(..., validation_alias="VIMEO_ACCESS_TOKEN")
     vimeo_user_id: int = Field(..., validation_alias="VIMEO_USER_ID")
@@ -47,16 +50,6 @@ class Settings(BaseSettings):
         ..., validation_alias="RECORDING_LATE_TOLERANCE_MINUTES"
     )
 
-    video_settings_file: str = Field(..., validation_alias="VIDEO_SETTINGS_FILE")
-    video_settings_name_field: str = Field(
-        ..., validation_alias="VIDEO_SETTINGS_NAME_FIELD"
-    )
-    video_name_timestamp_format: str = Field(
-        ..., validation_alias="VIDEO_NAME_TIMESTAMP_FORMAT"
-    )
-
-    moodle_access_token: str = Field(..., validation_alias="MOODLE_ACCESS_TOKEN")
-
     if TYPE_CHECKING:
 
         def __init__(self) -> None: ...
@@ -69,3 +62,21 @@ class Settings(BaseSettings):
             missing = required_keys - v.keys()
             raise ValueError(f"GROUP_MAP is missing required keys: {missing}")
         return v
+
+
+class VideoUpdateSettings(AppSettings):
+    video_settings_file: str = Field(..., validation_alias="VIDEO_SETTINGS_FILE")
+    video_settings_name_field: str = Field(
+        ..., validation_alias="VIDEO_SETTINGS_NAME_FIELD"
+    )
+    video_name_timestamp_format: str = Field(
+        ..., validation_alias="VIDEO_NAME_TIMESTAMP_FORMAT"
+    )
+
+    if TYPE_CHECKING:
+
+        def __init__(self) -> None: ...
+
+
+class MoodleSettings(AppSettings):
+    moodle_access_token: str = Field(..., validation_alias="MOODLE_ACCESS_TOKEN")
