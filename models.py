@@ -1,18 +1,18 @@
 from dataclasses import dataclass
-from datetime import datetime, date, time
+from datetime import date, datetime, time
 from enum import Enum
 
 from integrations.vimeo_client.models import VimeoVideo
 
 
 class TimeSource(str, Enum):
-    TITLE_TIMESTAMP = 'title_timestamp'
-    VIMEO_CREATED_TIME = 'vimeo_created_time'
+    TITLE_TIMESTAMP = "title_timestamp"
+    VIMEO_CREATED_TIME = "vimeo_created_time"
 
 
 class TitleTimestampTimezoneMode(str, Enum):
-    LOCAL = 'local'
-    UTC = 'utc'
+    LOCAL = "local"
+    UTC = "utc"
 
 
 @dataclass(slots=True, frozen=True)
