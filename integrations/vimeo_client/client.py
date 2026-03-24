@@ -82,7 +82,7 @@ class VimeoClient:
         )
         create_picture_response.raise_for_status()
 
-        update_picture_request_uri = create_picture_response.content
+        update_picture_request_uri = create_picture_response.json()["uri"]
         update_picture_response = self.client.patch(
             update_picture_request_uri, json={"active": True}
         )
