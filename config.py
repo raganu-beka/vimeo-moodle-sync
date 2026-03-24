@@ -55,6 +55,8 @@ class Settings(BaseSettings):
         ..., validation_alias="VIDEO_NAME_TIMESTAMP_FORMAT"
     )
 
+    moodle_access_token: str = Field(..., validation_alias="MOODLE_ACCESS_TOKEN")
+
     if TYPE_CHECKING:
 
         def __init__(self) -> None: ...
