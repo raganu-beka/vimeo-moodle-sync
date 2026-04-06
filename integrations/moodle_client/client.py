@@ -32,13 +32,28 @@ class MoodleClient:
 
         return response.json()
 
-    def get_courses(self) -> list[dict[str, str]]:
-        courses = self._call("core_course_get_courses")
+    def get_all_courses(self) -> list[dict[str, str]]:
+        data = self._call("core_course_get_courses")
         return [
             {
                 "id": course["id"],
                 "shortname": course["shortname"],
                 "fullname": course["fullname"],
             }
-            for course in courses
+            for course in data
         ]
+
+    def get_course_by_shortname(self, shortname: str) -> dict[str, str] | None:
+        data = self._call(
+            "core_course_get_courses_by_field", field="shortname", value=shortname
+        )
+        courses = data.get("courses", [])
+        if not courses:
+            return None
+
+        course = courses[0]
+        return {
+            "id": course["id"],
+            "shortname": course["shortname"],
+            "fullname": course["fullname"],
+        }

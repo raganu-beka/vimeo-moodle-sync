@@ -1,27 +1,77 @@
 import argparse
-from datetime import UTC, datetime
-from json import load
+from datetime import UTC, date, datetime
 
 import config
 from integrations.moodle_client import MoodleClient
 from integrations.vimeo_client import VimeoClient
 from matching.match_session_recordings import match_session_recordings
-from models import MatchResult
+from models import MatchResult, Recording
 from parsing.course_parser import parse_course_name
 from parsing.recording_normalizer import normalize_recording
 from scheduling.schedule_day import get_sessions_for_date
 
 
-def get_moodle_courses(moodle: MoodleClient) -> None:
-    courses = moodle.get_courses()
-    print("Moodle courses:")
-    for course in courses:
-        print(f"{course["shortname"]}  - {course["fullname"]}")
+def get_moodle_course_data(course_name: str) -> None:
+    moodle_settings = config.get_moodle_settings()
+
+    moodle = MoodleClient(
+        moodle_settings.moodle_base_url, moodle_settings.moodle_access_token
+    )
+    course = moodle.get_course_by_shortname(course_name)
+    if not course:
+        print(f"Failed to fetch course data for '{course_name}'")
+        return
+
+    print(f"{course["shortname"]}  - {course["fullname"]}")
 
 
-def load_settings_from_json(filepath: str) -> dict:
-    with open(filepath, "r", encoding="utf-8") as settings_file:
-        return load(settings_file)
+def match_session_recordings_for_day(day: date) -> MatchResult:
+    settings = config.get_settings()
+
+    vimeo = VimeoClient(settings.vimeo_access_token)
+    videos = vimeo.get_user_folder_videos_by_date(
+        settings.vimeo_user_id, settings.vimeo_folder_id, day
+    )
+
+    courses = [parse_course_name(course, settings) for course in settings.courses]
+    sessions = get_sessions_for_date(courses, day, settings.timezone_name)
+    recordings = [normalize_recording(video, settings) for video in videos]
+
+    return match_session_recordings(sessions, recordings, settings)
+
+
+def update_recording_settings(
+    recording: Recording, course_name: str, day: date
+) -> None:
+    settings = config.get_settings()
+    video_update_settings = config.get_video_update_settings()
+
+    recording_name = f"{course_name}-{day.strftime(video_update_settings.video_name_timestamp_format)}"
+    recording_settings = config.load_settings_from_json(
+        video_update_settings.video_settings_file
+    ).copy()
+    recording_settings[video_update_settings.video_settings_name_field] = recording_name
+
+    print(
+        f"Updating settings for recording '{recording.vimeo_video.name}' ({recording_name})"
+    )
+
+    vimeo = VimeoClient(settings.vimeo_access_token)
+
+    try:
+        vimeo.update_video_settings(recording.vimeo_video, recording_settings)
+    except Exception as e:
+        print(
+            f"Error updating settings for recording '{recording.vimeo_video.name}': {e}"
+        )
+        return
+
+    try:
+        vimeo.set_random_thumbnail_for_video(recording.vimeo_video)
+    except Exception as e:
+        print(
+            f"Error setting thumbnail for recording '{recording.vimeo_video.name}': {e}"
+        )
 
 
 def print_match_result(match_result: MatchResult) -> None:
@@ -87,24 +137,7 @@ def run_integration() -> None:
     )
     args = parser.parse_args()
 
-    moodle_settings = config.MoodleSettings()
-    moodle = MoodleClient(
-        moodle_settings.moodle_base_url, moodle_settings.moodle_access_token
-    )
-    get_moodle_courses(moodle)
-
-    settings = config.Settings()
-    vimeo = VimeoClient(settings.vimeo_access_token)
-
-    videos = vimeo.get_user_folder_videos_by_date(
-        settings.vimeo_user_id, settings.vimeo_folder_id, args.day
-    )
-
-    courses = [parse_course_name(course, settings) for course in settings.courses]
-    sessions = get_sessions_for_date(courses, args.day, settings.timezone_name)
-    recordings = [normalize_recording(video, settings) for video in videos]
-
-    match_result = match_session_recordings(sessions, recordings, settings)
+    match_result = match_session_recordings_for_day(args.day)
     print_match_result(match_result)
 
     if not match_result.matches:
@@ -118,35 +151,9 @@ def run_integration() -> None:
             print("Exiting without updating settings.")
             return
 
-    video_update_settings = config.VideoUpdateSettings()
-    video_settings = load_settings_from_json(video_update_settings.video_settings_file)
-
     for course_name, recording in match_result.matches.items():
-        recording_name = f"{course_name}-{args.day.strftime(video_update_settings.video_name_timestamp_format)}"
-
-        recording_settings = video_settings.copy()
-        recording_settings[video_update_settings.video_settings_name_field] = (
-            recording_name
-        )
-
-        print(
-            f"Updating settings for recording '{recording.vimeo_video.name}' ({recording_name})"
-        )
-
-        try:
-            vimeo.update_video_settings(recording.vimeo_video, recording_settings)
-        except Exception as e:
-            print(
-                f"Error updating settings for recording '{recording.vimeo_video.name}': {e}"
-            )
-            continue
-
-        try:
-            vimeo.set_random_thumbnail_for_video(recording.vimeo_video)
-        except Exception as e:
-            print(
-                f"Error setting thumbnail for recording '{recording.vimeo_video.name}': {e}"
-            )
+        update_recording_settings(recording, course_name, args.day)
+        get_moodle_course_data(course_name)
 
 
 if __name__ == "__main__":

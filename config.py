@@ -1,3 +1,5 @@
+from functools import lru_cache
+from json import load
 from typing import TYPE_CHECKING
 
 from pydantic import Field, field_validator
@@ -85,3 +87,24 @@ class MoodleSettings(AppSettings):
     if TYPE_CHECKING:
 
         def __init__(self) -> None: ...
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
+
+
+@lru_cache
+def get_video_update_settings() -> VideoUpdateSettings:
+    return VideoUpdateSettings()
+
+
+@lru_cache
+def get_moodle_settings() -> MoodleSettings:
+    return MoodleSettings()
+
+
+@lru_cache
+def load_settings_from_json(filepath: str) -> dict:
+    with open(filepath, "r", encoding="utf-8") as settings_file:
+        return load(settings_file)
