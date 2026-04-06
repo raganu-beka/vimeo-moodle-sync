@@ -1,7 +1,6 @@
 import argparse
 from datetime import UTC, datetime
 from json import load
-from pprint import pprint
 
 import config
 from integrations.moodle_client import MoodleClient
@@ -11,6 +10,13 @@ from models import MatchResult
 from parsing.course_parser import parse_course_name
 from parsing.recording_normalizer import normalize_recording
 from scheduling.schedule_day import get_sessions_for_date
+
+
+def get_moodle_courses(moodle: MoodleClient) -> None:
+    courses = moodle.get_courses()
+    print("Moodle courses:")
+    for course in courses:
+        print(f"{course["shortname"]}  - {course["fullname"]}")
 
 
 def load_settings_from_json(filepath: str) -> dict:
@@ -85,10 +91,7 @@ def run_integration() -> None:
     moodle = MoodleClient(
         moodle_settings.moodle_base_url, moodle_settings.moodle_access_token
     )
-
-    courses = moodle.get_courses()
-    print("AVAILABLE MOODLE COURSES")
-    pprint(courses)
+    get_moodle_courses(moodle)
 
     settings = config.Settings()
     vimeo = VimeoClient(settings.vimeo_access_token)
