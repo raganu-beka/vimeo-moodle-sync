@@ -61,16 +61,15 @@ def update_recording_settings(
     try:
         vimeo.update_video_settings(recording.vimeo_video, recording_settings)
     except Exception as e:
-        print(
-            f"Error updating settings for recording '{recording.vimeo_video.name}': {e}"
+        raise Exception(
+            "Error updating settings for recording '{recording.vimeo_video.name}'", e
         )
-        return
 
     try:
         vimeo.set_random_thumbnail_for_video(recording.vimeo_video)
     except Exception as e:
-        print(
-            f"Error setting thumbnail for recording '{recording.vimeo_video.name}': {e}"
+        raise Exception(
+            "Error setting thumbnail for recording '{recording.vimeo_video.name}'", e
         )
 
 
@@ -152,8 +151,13 @@ def run_integration() -> None:
             return
 
     for course_name, recording in match_result.matches.items():
-        update_recording_settings(recording, course_name, args.day)
-        get_moodle_course_data(course_name)
+
+        try:
+            update_recording_settings(recording, course_name, args.day)
+            get_moodle_course_data(course_name)
+
+        except Exception as e:
+            print(f"Error processing recording '{recording.vimeo_video.name}': {e}")
 
 
 if __name__ == "__main__":
