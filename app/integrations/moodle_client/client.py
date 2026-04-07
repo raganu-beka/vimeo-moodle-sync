@@ -2,8 +2,8 @@ from typing import Any
 
 import requests
 
-from integrations.moodle_client.exceptions import MoodleError
-from integrations.moodle_client.models import MoodleCourse, MoodleCourseSection
+from app.integrations.moodle_client.exceptions import MoodleError
+from app.integrations.moodle_client.models import MoodleCourse, MoodleCourseSection
 
 
 class MoodleClient:

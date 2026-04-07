@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, time
 from enum import Enum
 
-from integrations.vimeo_client.models import VimeoVideo
+from app.integrations.vimeo_client.models import VimeoVideo
 
 
 class TimeSource(str, Enum):

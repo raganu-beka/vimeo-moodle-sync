@@ -2,8 +2,8 @@ from collections import Counter
 from datetime import datetime, timedelta
 from typing import Any
 
-from config import Settings
-from models import CourseSession, MatchResult, Recording
+from app.config import Settings
+from app.models import CourseSession, MatchResult, Recording
 
 
 def _get_sorted_by_key(list_items: list[Any], key: str) -> list[Any]:

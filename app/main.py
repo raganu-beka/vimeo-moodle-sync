@@ -2,15 +2,15 @@ import argparse
 from datetime import UTC, date, datetime
 from pprint import pprint
 
-import config
-from integrations.moodle_client import MoodleClient
-from integrations.vimeo_client import VimeoClient
-from matching.match_date_section import get_course_section_for_day
-from matching.match_session_recordings import match_session_recordings
-from models import MatchResult, Recording
-from parsing.course_parser import parse_course_name
-from parsing.recording_normalizer import normalize_recording
-from scheduling.schedule_day import get_sessions_for_date
+import app.config as config
+from app.integrations.moodle_client import MoodleClient
+from app.integrations.vimeo_client import VimeoClient
+from app.matching.match_date_section import get_course_section_for_day
+from app.matching.match_session_recordings import match_session_recordings
+from app.models import MatchResult, Recording
+from app.parsing.course_parser import parse_course_name
+from app.parsing.recording_normalizer import normalize_recording
+from app.scheduling.schedule_day import get_sessions_for_date
 
 
 def update_moodle_course_section(course_name: str, day: date) -> None:

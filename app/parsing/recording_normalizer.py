@@ -3,9 +3,9 @@ from datetime import datetime, timezone
 from typing import Pattern, Sequence
 from zoneinfo import ZoneInfo
 
-import config
-from integrations.vimeo_client.models import VimeoVideo
-from models import TitleTimestampTimezoneMode, TimeSource, Recording
+import app.config as config
+from app.integrations.vimeo_client.models import VimeoVideo
+from app.models import TitleTimestampTimezoneMode, TimeSource, Recording
 
 
 def _extract_title_timestamp(

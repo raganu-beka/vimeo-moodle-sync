@@ -1,7 +1,7 @@
 from datetime import date
 
-from config import MoodleSettings
-from integrations.moodle_client.models import MoodleCourseSection
+from app.config import MoodleSettings
+from app.integrations.moodle_client.models import MoodleCourseSection
 
 
 def _get_section_name(

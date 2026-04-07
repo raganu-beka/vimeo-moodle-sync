@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from parsing.recording_normalizer import TitleTimestampTimezoneMode
+from app.parsing.recording_normalizer import TitleTimestampTimezoneMode
 
 
 class AppSettings(BaseSettings):
