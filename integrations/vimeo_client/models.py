@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import timedelta
 
@@ -11,7 +13,7 @@ class VimeoVideo:
     created_time: str
 
     @staticmethod
-    def from_api(data: dict):
+    def from_api(data: dict) -> VimeoVideo:
         return VimeoVideo(
             uri=data["uri"],
             name=data["name"],
