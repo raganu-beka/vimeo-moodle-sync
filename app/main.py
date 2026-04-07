@@ -1,19 +1,22 @@
 import argparse
 from datetime import UTC, date, datetime
-from pprint import pprint
 
 import app.config as config
+from app.embedding.embed_video import append_embed_to_summary, get_video_embed
 from app.integrations.moodle_client import MoodleClient
 from app.integrations.vimeo_client import VimeoClient
+from app.integrations.vimeo_client.models import VimeoVideo
 from app.matching.match_date_section import get_course_section_for_day
 from app.matching.match_session_recordings import match_session_recordings
-from app.models import MatchResult, Recording
+from app.models import MatchResult
 from app.parsing.course_parser import parse_course_name
 from app.parsing.recording_normalizer import normalize_recording
 from app.scheduling.schedule_day import get_sessions_for_date
 
 
-def update_moodle_course_section(course_name: str, day: date) -> None:
+def update_moodle_course_section(
+    recording: VimeoVideo, recording_title: str, course_name: str, day: date
+) -> None:
     moodle_settings = config.get_moodle_settings()
 
     moodle = MoodleClient(
@@ -29,7 +32,48 @@ def update_moodle_course_section(course_name: str, day: date) -> None:
             f"Failed to find section for {day.strftime("%d-%m-%Y")} in course '{course_name}'"
         )
 
-    pprint(day_section)
+    embed_html = get_video_embed(recording, recording_title)
+    updated_summary = append_embed_to_summary(day_section.summary, embed_html)
+
+    try:
+        moodle.update_course_section_summary(day_section.id, updated_summary)
+    except Exception as e:
+        raise Exception(
+            f"Error publishing recording '{recording.name}' ('{recording_title}')", e
+        )
+
+
+def update_recording_settings(recording: VimeoVideo, recording_title: str) -> None:
+    settings = config.get_settings()
+    video_update_settings = config.get_video_update_settings()
+
+    recording_settings = config.load_video_update_settings_from_file().copy()
+    recording_settings[video_update_settings.video_settings_name_field] = (
+        recording_title
+    )
+
+    vimeo = VimeoClient(settings.vimeo_access_token)
+
+    try:
+        vimeo.update_video_settings(recording, recording_settings)
+    except Exception as e:
+        raise Exception(
+            f"Error updating settings for recording '{recording.name}' ('{recording_title}')",
+            e,
+        )
+
+    try:
+        vimeo.set_random_thumbnail_for_video(recording)
+    except Exception as e:
+        raise Exception(
+            f"Error setting thumbnail for recording '{recording.name}' ('{recording_title}')",
+            e,
+        )
+
+
+def get_recording_title(course_name: str, day: date):
+    video_update_settings = config.get_video_update_settings()
+    return f"{course_name}-{day.strftime(video_update_settings.video_name_timestamp_format)}"
 
 
 def match_session_recordings_for_day(day: date) -> MatchResult:
@@ -45,35 +89,6 @@ def match_session_recordings_for_day(day: date) -> MatchResult:
     recordings = [normalize_recording(video, settings) for video in videos]
 
     return match_session_recordings(sessions, recordings, settings)
-
-
-def update_recording_settings(
-    recording: Recording, course_name: str, day: date
-) -> None:
-    settings = config.get_settings()
-    video_update_settings = config.get_video_update_settings()
-
-    recording_name = f"{course_name}-{day.strftime(video_update_settings.video_name_timestamp_format)}"
-    recording_settings = config.load_settings_from_json(
-        video_update_settings.video_settings_file
-    ).copy()
-    recording_settings[video_update_settings.video_settings_name_field] = recording_name
-
-    vimeo = VimeoClient(settings.vimeo_access_token)
-
-    try:
-        vimeo.update_video_settings(recording.vimeo_video, recording_settings)
-    except Exception as e:
-        raise Exception(
-            "Error updating settings for recording '{recording.vimeo_video.name}'", e
-        )
-
-    try:
-        vimeo.set_random_thumbnail_for_video(recording.vimeo_video)
-    except Exception as e:
-        raise Exception(
-            "Error setting thumbnail for recording '{recording.vimeo_video.name}'", e
-        )
 
 
 def print_match_result(match_result: MatchResult) -> None:
@@ -156,15 +171,16 @@ def run_integration() -> None:
     for course_name, recording in match_result.matches.items():
 
         try:
+            recording_title = get_recording_title(course_name, args.day)
 
             print(
-                f"Updating Vimeo settings for recording '{recording.vimeo_video.name}'"
+                f"Updating Vimeo settings for recording '{recording.vimeo_video.name}' ('{recording_title}')"
             )
-            # update_recording_settings(recording, course_name, args.day)
-            print(
-                f"Publishing recording '{recording.vimeo_video.name}' to course {course_name}"
+            # update_recording_settings(recording, recording_title)
+            print(f"Publishing recording '{recording_title}' to course {course_name}")
+            update_moodle_course_section(
+                recording.vimeo_video, recording_title, course_name, args.day
             )
-            update_moodle_course_section(course_name, args.day)
 
         except Exception as e:
             print(f"Error processing recording '{recording.vimeo_video.name}': {e}")

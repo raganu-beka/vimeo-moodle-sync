@@ -57,3 +57,11 @@ class MoodleClient:
 
         data = self._call("core_course_get_contents", courseid=course.id)
         return [MoodleCourseSection.from_api(section) for section in data]
+
+    def update_course_section_summary(
+        self,
+        section_id: int,
+        summary_html: str,
+        summary_format: int = 1,
+    ) -> None:
+        pass
