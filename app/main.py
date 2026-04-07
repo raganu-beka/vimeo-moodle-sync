@@ -176,7 +176,7 @@ def run_integration() -> None:
             print(
                 f"Updating Vimeo settings for recording '{recording.vimeo_video.name}' ('{recording_title}')"
             )
-            # update_recording_settings(recording, recording_title)
+            update_recording_settings(recording.vimeo_video, recording_title)
             print(f"Publishing recording '{recording_title}' to course {course_name}")
             update_moodle_course_section(
                 recording.vimeo_video, recording_title, course_name, args.day
