@@ -83,6 +83,12 @@ class VideoUpdateSettings(AppSettings):
 class MoodleSettings(AppSettings):
     moodle_base_url: str = Field(..., validation_alias="MOODLE_BASE_URL")
     moodle_access_token: str = Field(..., validation_alias="MOODLE_ACCESS_TOKEN")
+    moodle_section_date_template: str = Field(
+        ..., validation_alias="MOODLE_SECTION_DATE_TEMPLATE"
+    )
+    moodle_section_month_aliases: dict[int, str] = Field(
+        ..., validation_alias="MOODLE_SECTION_MONTH_ALIASES"
+    )
 
     if TYPE_CHECKING:
 

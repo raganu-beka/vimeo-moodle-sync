@@ -3,7 +3,7 @@ from typing import Any
 import requests
 
 from integrations.moodle_client.exceptions import MoodleError
-from integrations.moodle_client.models import MoodleCourse
+from integrations.moodle_client.models import MoodleCourse, MoodleCourseSection
 
 
 class MoodleClient:
@@ -48,10 +48,12 @@ class MoodleClient:
         course = courses[0]
         return MoodleCourse.from_api(course)
 
-    def get_course_sections_by_shortname(self, shortname: str) -> list[dict] | None:
+    def get_course_sections_by_shortname(
+        self, shortname: str
+    ) -> list[MoodleCourseSection] | None:
         course = self.get_course_by_shortname(shortname)
         if not course:
             return None
 
         data = self._call("core_course_get_contents", courseid=course.id)
-        return data
+        return [MoodleCourseSection.from_api(section) for section in data]

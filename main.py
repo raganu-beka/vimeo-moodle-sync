@@ -1,9 +1,11 @@
 import argparse
 from datetime import UTC, date, datetime
+from pprint import pprint
 
 import config
 from integrations.moodle_client import MoodleClient
 from integrations.vimeo_client import VimeoClient
+from matching.match_date_section import get_course_section_for_day
 from matching.match_session_recordings import match_session_recordings
 from models import MatchResult, Recording
 from parsing.course_parser import parse_course_name
@@ -11,7 +13,7 @@ from parsing.recording_normalizer import normalize_recording
 from scheduling.schedule_day import get_sessions_for_date
 
 
-def get_moodle_course_data(course_name: str) -> None:
+def update_moodle_course_section(course_name: str, day: date) -> None:
     moodle_settings = config.get_moodle_settings()
 
     moodle = MoodleClient(
@@ -19,11 +21,15 @@ def get_moodle_course_data(course_name: str) -> None:
     )
     course_sections = moodle.get_course_sections_by_shortname(course_name)
     if not course_sections:
-        print(f"Failed to fetch course data for '{course_name}'")
-        return
+        raise Exception(f"Failed to fetch course data for '{course_name}'")
 
-    with open(f"{course_name}_sections.json", "w") as f:
-        f.write(str(course_sections))
+    day_section = get_course_section_for_day(course_sections, day, moodle_settings)
+    if not day_section:
+        raise Exception(
+            f"Failed to find section for {day.strftime("%d-%m-%Y")} in course '{course_name}'"
+        )
+
+    pprint(day_section)
 
 
 def match_session_recordings_for_day(day: date) -> MatchResult:
@@ -52,10 +58,6 @@ def update_recording_settings(
         video_update_settings.video_settings_file
     ).copy()
     recording_settings[video_update_settings.video_settings_name_field] = recording_name
-
-    print(
-        f"Updating settings for recording '{recording.vimeo_video.name}' ({recording_name})"
-    )
 
     vimeo = VimeoClient(settings.vimeo_access_token)
 
@@ -154,8 +156,15 @@ def run_integration() -> None:
     for course_name, recording in match_result.matches.items():
 
         try:
+
+            print(
+                f"Updating Vimeo settings for recording '{recording.vimeo_video.name}'"
+            )
             # update_recording_settings(recording, course_name, args.day)
-            get_moodle_course_data(course_name)
+            print(
+                f"Publishing recording '{recording.vimeo_video.name}' to course {course_name}"
+            )
+            update_moodle_course_section(course_name, args.day)
 
         except Exception as e:
             print(f"Error processing recording '{recording.vimeo_video.name}': {e}")
