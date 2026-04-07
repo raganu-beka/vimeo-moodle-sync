@@ -3,6 +3,7 @@ from typing import Any
 import requests
 
 from integrations.moodle_client.exceptions import MoodleError
+from integrations.moodle_client.models import MoodleCourse
 
 
 class MoodleClient:
@@ -32,18 +33,11 @@ class MoodleClient:
 
         return response.json()
 
-    def get_all_courses(self) -> list[dict[str, str]]:
+    def get_all_courses(self) -> list[MoodleCourse]:
         data = self._call("core_course_get_courses")
-        return [
-            {
-                "id": course["id"],
-                "shortname": course["shortname"],
-                "fullname": course["fullname"],
-            }
-            for course in data
-        ]
+        return [MoodleCourse.from_api(course) for course in data]
 
-    def get_course_by_shortname(self, shortname: str) -> dict[str, str] | None:
+    def get_course_by_shortname(self, shortname: str) -> MoodleCourse | None:
         data = self._call(
             "core_course_get_courses_by_field", field="shortname", value=shortname
         )
@@ -52,8 +46,12 @@ class MoodleClient:
             return None
 
         course = courses[0]
-        return {
-            "id": course["id"],
-            "shortname": course["shortname"],
-            "fullname": course["fullname"],
-        }
+        return MoodleCourse.from_api(course)
+
+    def get_course_sections_by_shortname(self, shortname: str) -> list[dict] | None:
+        course = self.get_course_by_shortname(shortname)
+        if not course:
+            return None
+
+        data = self._call("core_course_get_contents", courseid=course.id)
+        return data

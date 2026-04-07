@@ -17,12 +17,13 @@ def get_moodle_course_data(course_name: str) -> None:
     moodle = MoodleClient(
         moodle_settings.moodle_base_url, moodle_settings.moodle_access_token
     )
-    course = moodle.get_course_by_shortname(course_name)
-    if not course:
+    course_sections = moodle.get_course_sections_by_shortname(course_name)
+    if not course_sections:
         print(f"Failed to fetch course data for '{course_name}'")
         return
 
-    print(f"{course["shortname"]}  - {course["fullname"]}")
+    with open(f"{course_name}_sections.json", "w") as f:
+        f.write(str(course_sections))
 
 
 def match_session_recordings_for_day(day: date) -> MatchResult:
@@ -153,7 +154,7 @@ def run_integration() -> None:
     for course_name, recording in match_result.matches.items():
 
         try:
-            update_recording_settings(recording, course_name, args.day)
+            # update_recording_settings(recording, course_name, args.day)
             get_moodle_course_data(course_name)
 
         except Exception as e:
