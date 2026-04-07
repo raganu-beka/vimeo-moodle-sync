@@ -74,6 +74,23 @@ class VideoUpdateSettings(AppSettings):
     video_name_timestamp_format: str = Field(
         ..., validation_alias="VIDEO_NAME_TIMESTAMP_FORMAT"
     )
+    video_embed_template_file: str = Field(
+        ..., validation_alias="VIDEO_EMBED_TEMPLATE_FILE"
+    )
+    video_embed_configuration: dict[str, str] = Field(
+        ..., validation_alias="VIDEO_EMBED_CONFIGURATION"
+    )
+
+    @classmethod
+    @field_validator("video_embed_configuration")
+    def validate_group_map(cls, v: dict[str, str]) -> dict[str, str]:
+        required_keys = {"max_width", "width", "height"}
+        if not required_keys.issubset(v.keys()):
+            missing = required_keys - v.keys()
+            raise ValueError(
+                f"VIDEO_EMBED_CONFIGURATION is missing required keys: {missing}"
+            )
+        return v
 
     if TYPE_CHECKING:
 
@@ -111,6 +128,16 @@ def get_moodle_settings() -> MoodleSettings:
 
 
 @lru_cache
-def load_settings_from_json(filepath: str) -> dict:
-    with open(filepath, "r", encoding="utf-8") as settings_file:
+def load_video_update_settings_from_file() -> dict:
+    settings = get_video_update_settings()
+    with open(settings.video_settings_file, "r", encoding="utf-8") as settings_file:
         return load(settings_file)
+
+
+@lru_cache
+def load_video_embed_template_from_file() -> str:
+    settings = get_video_update_settings()
+    with open(
+        settings.video_embed_template_file, "r", encoding="utf-8"
+    ) as template_file:
+        return template_file.read()

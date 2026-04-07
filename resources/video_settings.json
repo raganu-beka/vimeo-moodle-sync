@@ -1,0 +1,37 @@
+{
+  "name": "Updated recording name",
+  "privacy": {
+    "view": "unlisted",
+    "download": false,
+    "add": false,
+    "comments": "nobody",
+    "embed": "whitelist"
+  },
+  "embed": {
+    "domains": [
+      "datorium.eu"
+    ],
+    "buttons": {
+      "like": false,
+      "watchlater": false,
+      "share": false,
+      "embed": false
+    },
+    "logos": {
+      "vimeo": false
+    },
+    "title": {
+      "name": true,
+      "owner": true,
+      "portrait": "show"
+    },
+    "playbar": true,
+    "volume": true,
+    "speed": true,
+    "quality": true,
+    "fullscreen": true,
+    "chromecast": true,
+    "airplay": true,
+    "pip": true
+  }
+}
