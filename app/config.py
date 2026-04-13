@@ -1,9 +1,11 @@
+from functools import lru_cache
+from json import load
 from typing import TYPE_CHECKING
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from parsing.recording_normalizer import TitleTimestampTimezoneMode
+from app.parsing.recording_normalizer import TitleTimestampTimezoneMode
 
 
 class AppSettings(BaseSettings):
@@ -72,6 +74,23 @@ class VideoUpdateSettings(AppSettings):
     video_name_timestamp_format: str = Field(
         ..., validation_alias="VIDEO_NAME_TIMESTAMP_FORMAT"
     )
+    video_embed_template_file: str = Field(
+        ..., validation_alias="VIDEO_EMBED_TEMPLATE_FILE"
+    )
+    video_embed_configuration: dict[str, str] = Field(
+        ..., validation_alias="VIDEO_EMBED_CONFIGURATION"
+    )
+
+    @classmethod
+    @field_validator("video_embed_configuration")
+    def validate_group_map(cls, v: dict[str, str]) -> dict[str, str]:
+        required_keys = {"max_width", "width", "height"}
+        if not required_keys.issubset(v.keys()):
+            missing = required_keys - v.keys()
+            raise ValueError(
+                f"VIDEO_EMBED_CONFIGURATION is missing required keys: {missing}"
+            )
+        return v
 
     if TYPE_CHECKING:
 
@@ -79,4 +98,46 @@ class VideoUpdateSettings(AppSettings):
 
 
 class MoodleSettings(AppSettings):
+    moodle_base_url: str = Field(..., validation_alias="MOODLE_BASE_URL")
     moodle_access_token: str = Field(..., validation_alias="MOODLE_ACCESS_TOKEN")
+    moodle_section_date_template: str = Field(
+        ..., validation_alias="MOODLE_SECTION_DATE_TEMPLATE"
+    )
+    moodle_section_month_aliases: dict[int, str] = Field(
+        ..., validation_alias="MOODLE_SECTION_MONTH_ALIASES"
+    )
+
+    if TYPE_CHECKING:
+
+        def __init__(self) -> None: ...
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
+
+
+@lru_cache
+def get_video_update_settings() -> VideoUpdateSettings:
+    return VideoUpdateSettings()
+
+
+@lru_cache
+def get_moodle_settings() -> MoodleSettings:
+    return MoodleSettings()
+
+
+@lru_cache
+def load_video_update_settings_from_file() -> dict:
+    settings = get_video_update_settings()
+    with open(settings.video_settings_file, "r", encoding="utf-8") as settings_file:
+        return load(settings_file)
+
+
+@lru_cache
+def load_video_embed_template_from_file() -> str:
+    settings = get_video_update_settings()
+    with open(
+        settings.video_embed_template_file, "r", encoding="utf-8"
+    ) as template_file:
+        return template_file.read()

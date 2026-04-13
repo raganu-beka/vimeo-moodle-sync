@@ -1,7 +1,7 @@
 from datetime import date, datetime, timezone
 from zoneinfo import ZoneInfo
 
-from models import ParsedCourseName, CourseSession
+from app.models import ParsedCourseName, CourseSession
 
 
 def get_sessions_for_date(

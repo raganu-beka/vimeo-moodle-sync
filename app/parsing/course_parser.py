@@ -2,9 +2,9 @@ import re
 from datetime import datetime, time
 from typing import Sequence
 
-from config import Settings
-from models import ParsedCourseName
-from parsing.weekday import weekday_to_int
+from app.config import Settings
+from app.models import ParsedCourseName
+from app.parsing.weekday import weekday_to_int
 
 
 def _parse_time_value(value: str, formats: Sequence[str]) -> time:
