@@ -9,7 +9,7 @@
   },
   "embed": {
     "domains": [
-      "datorium.eu"
+      "example.com"
     ],
     "buttons": {
       "like": false,
@@ -23,7 +23,7 @@
     "title": {
       "name": true,
       "owner": true,
-      "portrait": "show"
+      "portrait": "hide"
     },
     "playbar": true,
     "volume": true,
