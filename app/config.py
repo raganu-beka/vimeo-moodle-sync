@@ -1,16 +1,21 @@
 from functools import lru_cache
 from json import load
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.constants import PACKAGE_NAME
 from app.parsing.recording_normalizer import TitleTimestampTimezoneMode
+
+CONFIG_DIR = Path.home() / ".config" / PACKAGE_NAME
 
 
 class AppSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+        env_file=[CONFIG_DIR / ".env", ".env"],
+        env_file_encoding="utf-8",
+        extra="ignore",
     )
 
 
@@ -52,10 +57,6 @@ class Settings(AppSettings):
         ..., validation_alias="RECORDING_LATE_TOLERANCE_MINUTES"
     )
 
-    if TYPE_CHECKING:
-
-        def __init__(self) -> None: ...
-
     @classmethod
     @field_validator("course_title_pattern_group_map")
     def validate_group_map(cls, v: dict[str, str]) -> dict[str, str]:
@@ -92,10 +93,6 @@ class VideoUpdateSettings(AppSettings):
             )
         return v
 
-    if TYPE_CHECKING:
-
-        def __init__(self) -> None: ...
-
 
 class MoodleSettings(AppSettings):
     moodle_base_url: str = Field(..., validation_alias="MOODLE_BASE_URL")
@@ -107,24 +104,20 @@ class MoodleSettings(AppSettings):
         ..., validation_alias="MOODLE_SECTION_MONTH_ALIASES"
     )
 
-    if TYPE_CHECKING:
-
-        def __init__(self) -> None: ...
-
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    return Settings()  # type: ignore
 
 
 @lru_cache
 def get_video_update_settings() -> VideoUpdateSettings:
-    return VideoUpdateSettings()
+    return VideoUpdateSettings()  # type: ignore
 
 
 @lru_cache
 def get_moodle_settings() -> MoodleSettings:
-    return MoodleSettings()
+    return MoodleSettings()  # type: ignore
 
 
 @lru_cache
