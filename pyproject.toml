@@ -1,0 +1,23 @@
+[project]
+name = "vimeo-moodle-sync"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.14"
+dependencies = [
+    "pydantic>=2.12",
+    "pydantic-settings>=2.13",
+    "python-dotenv>=1.2",
+    "PyVimeo>=1.1",
+    "requests>=2.32",
+    "tzdata>=2025.3",
+]
+
+[project.scripts]
+vimeo-moodle-sync = "app.main:run_integration"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
